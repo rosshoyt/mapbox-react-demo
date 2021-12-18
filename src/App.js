@@ -1,7 +1,8 @@
+import { Marker } from "mapbox-gl";
 import React, { useRef, useEffect, useState } from "react";
 import mapboxgl from "!mapbox-gl"; // eslint-disable-line import/no-webpack-loader-syntax
 
-// default MapBox public token
+// default MapBox  public token
 mapboxgl.accessToken =
   "pk.eyJ1Ijoicm9zc2hveXQiLCJhIjoiY2t4Y2Jzcmw0NDA1ZjJwcDk0cjFqMXJvYiJ9.d0Tc4UAhJ7HdV83xpqUm0w";
 
@@ -11,8 +12,14 @@ export default function App() {
   const [lng, setLng] = useState(-70.9);
   const [lat, setLat] = useState(42.35);
   const [zoom, setZoom] = useState(9);
+  const [locationsList, setLocationsList] = useState([]);
 
   useEffect(() => {
+    // load station data
+    fetch("seattle-weather-stations.json")
+      .then((res) => res.json())
+      .then((data) => setLocationsList(data["results"]));
+    
     if (map.current) return; // initialize map only once
     map.current = new mapboxgl.Map({
       container: mapContainer.current,
@@ -37,6 +44,11 @@ export default function App() {
         Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
       </div>
       <div ref={mapContainer} className="map-container" />
+      {locationsList.map(location => (
+        <Marker key={location.id} latitude={location.latitude} longitude={location.longitude} >
+          <div>Hi!</div>
+        </Marker>
+      ))}
     </div>
   );
 }
