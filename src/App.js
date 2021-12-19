@@ -1,17 +1,19 @@
-import { Marker } from "mapbox-gl";
+import ReactMapGL, { Marker } from "react-map-gl";
 import React, { useRef, useEffect, useState } from "react";
-import mapboxgl from "!mapbox-gl"; // eslint-disable-line import/no-webpack-loader-syntax
 
 // default MapBox  public token
-mapboxgl.accessToken =
+let accessToken =
   "pk.eyJ1Ijoicm9zc2hveXQiLCJhIjoiY2t4Y2Jzcmw0NDA1ZjJwcDk0cjFqMXJvYiJ9.d0Tc4UAhJ7HdV83xpqUm0w";
 
 export default function App() {
-  const mapContainer = useRef(null);
-  const map = useRef(null);
-  const [lng, setLng] = useState(-70.9);
-  const [lat, setLat] = useState(42.35);
-  const [zoom, setZoom] = useState(9);
+  const [viewport, setViewport] = useState({
+    latitude: 47.608013,
+    longitude: -122.335167,
+    width: "100vw",
+    height: "100vh",
+    zoom: 9,
+  });
+
   const [locationsList, setLocationsList] = useState([]);
 
   useEffect(() => {
@@ -19,36 +21,23 @@ export default function App() {
     fetch("seattle-weather-stations.json")
       .then((res) => res.json())
       .then((data) => setLocationsList(data["results"]));
-    
-    if (map.current) return; // initialize map only once
-    map.current = new mapboxgl.Map({
-      container: mapContainer.current,
-      style: "mapbox://styles/mapbox/streets-v11",
-      center: [lng, lat],
-      zoom: zoom,
-    });
-  });
-
-  useEffect(() => {
-    if (!map.current) return; // wait for map to initialize
-    map.current.on("move", () => {
-      setLng(map.current.getCenter().lng.toFixed(4));
-      setLat(map.current.getCenter().lat.toFixed(4));
-      setZoom(map.current.getZoom().toFixed(2));
-    });
-  });
+  }, []);
 
   return (
     <div>
-      <div className="sidebar">
-        Longitude: {lng} | Latitude: {lat} | Zoom: {zoom}
-      </div>
-      <div ref={mapContainer} className="map-container" />
-      {locationsList.map(location => (
-        <Marker key={location.id} latitude={location.latitude} longitude={location.longitude} >
-          <div>Hi!</div>
-        </Marker>
-      ))}
+      <ReactMapGL
+        {...viewport}
+        mapboxApiAccessToken={accessToken}
+        onViewportChange={(viewport) => {
+          setViewport(viewport);
+        }}
+      >
+        {locationsList.map((location) => (
+          <Marker key={location.id} latitude={location.latitude} longitude={location.longitude}>
+            <button><img src="location-icon.png" alt="location icon"  width="10" height="10"/></button>
+          </Marker>
+        ))}
+      </ReactMapGL>
     </div>
   );
 }
