@@ -1,5 +1,6 @@
-import ReactMapGL, { Marker } from "react-map-gl";
+import ReactMapGL, { Marker, Popup } from "react-map-gl";
 import React, { useRef, useEffect, useState } from "react";
+import "./index.css";
 
 // default MapBox  public token
 let accessToken =
@@ -15,6 +16,8 @@ export default function App() {
   });
 
   const [locationsList, setLocationsList] = useState([]);
+
+  const [selectedLocation, setSelectedLocation] = useState(null);
 
   useEffect(() => {
     // load station data
@@ -33,10 +36,36 @@ export default function App() {
         }}
       >
         {locationsList.map((location) => (
-          <Marker key={location.id} latitude={location.latitude} longitude={location.longitude}>
-            <button><img src="location-icon.png" alt="location icon"  width="10" height="10"/></button>
+          <Marker
+            key={location.id}
+            latitude={location.latitude}
+            longitude={location.longitude}
+            //offsetTop={-10}
+          >
+            <button
+              className="marker-btn"
+              onClick={(e) => {
+                e.preventDefault();
+                setSelectedLocation(location);
+              }}
+            >
+              <img src="location-icon.png" alt="location icon" />
+            </button>
           </Marker>
         ))}
+        {selectedLocation ? (
+          <Popup
+            latitude={selectedLocation.latitude}
+            longitude={selectedLocation.longitude}
+            onClose={() => {
+              setSelectedLocation(null);
+            }}
+          >
+            <h2>{selectedLocation.name}</h2>
+          </Popup>
+        ) : (
+          <></>
+        )}
       </ReactMapGL>
     </div>
   );
