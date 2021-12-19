@@ -1,5 +1,5 @@
 import ReactMapGL, { Marker, Popup } from "react-map-gl";
-import React, { useRef, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import "./index.css";
 
 // default MapBox  public token
@@ -20,10 +20,21 @@ export default function App() {
   const [selectedLocation, setSelectedLocation] = useState(null);
 
   useEffect(() => {
+    // listen for escape (to exit the current map selection)
+    const listener = (e) => {
+      if (e.key === "Escape") {
+        setSelectedLocation(null);
+      }
+    };
+    window.addEventListener("keydown", listener);
     // load station data
     fetch("seattle-weather-stations.json")
       .then((res) => res.json())
       .then((data) => setLocationsList(data["results"]));
+
+    return () => {
+      window.removeEventListener("keydown", listener);
+    };
   }, []);
 
   return (
@@ -40,7 +51,8 @@ export default function App() {
             key={location.id}
             latitude={location.latitude}
             longitude={location.longitude}
-            //offsetTop={-10}
+            offsetTop={-20}
+            offsetLeft={-15}
           >
             <button
               className="marker-btn"
@@ -61,7 +73,15 @@ export default function App() {
               setSelectedLocation(null);
             }}
           >
-            <h2>{selectedLocation.name}</h2>
+            <h4>{selectedLocation.name}</h4>
+            <div>
+              Latitude/Longitude: ({selectedLocation.latitude},{" "}
+              {selectedLocation.latitude}
+            </div>
+            <div>
+              Elevation: {selectedLocation.elevation}{" "}
+              {selectedLocation.elevationUnit}
+            </div>
           </Popup>
         ) : (
           <></>
